@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>initfile/a.txt</file>
+        <file>initfile/b.txt</file>
+        <file>initfile/c.txt</file>
+        <file>initfile/d.txt</file>
+        <file>initfile/e.txt</file>
+        <file>initfile/f.txt</file>
+        <file>initfile/g.txt</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>playback_images/play.png</file>
+        <file>playback_images/pause.png</file>
+        <file>playback_images/forward.png</file>
+        <file>playback_images/back.png</file>
+        <file>playback_images/next.png</file>
+        <file>playback_images/hidden.png</file>
+        <file>playback_images/volume.png</file>
+        <file>playback_images/mute.png</file>
+        <file>playback_images/full.png</file>
+        <file>playback_images/missing.png</file>
+        <file>playback_images/restart.png</file>
+    </qresource>
+</RCC>
