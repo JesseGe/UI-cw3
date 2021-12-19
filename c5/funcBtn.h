@@ -17,7 +17,7 @@ public:
     const QString ButtonStyleSheet = "QPushButton { background-color: #778899; color: white; border-radius: 8px;} QPushButton:hover {background-color: #6f74dd;}";
     
     void enterEvent(QEvent *event);
-    void leaveEvent(QEvent *event);
+    void leaveEvent();
 private:
     bool leave;
 };

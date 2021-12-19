@@ -5,7 +5,6 @@
 #ifndef CW2_THE_PLAYER_H
 #define CW2_THE_PLAYER_H
 
-
 #include <QApplication>
 #include <QMediaPlayer>
 #include "the_button.h"
@@ -16,26 +15,27 @@
 #include <QVBoxLayout>
 #include <QSlider>
 #include <QToolTip>
-#include<QLabel>
+#include <QLabel>
 #include "funcBtn.h"
-#include<QFileInfo>
+#include <QFileInfo>
 
 using namespace std;
 
-class ThePlayer : public QMediaPlayer {
+class ThePlayer : public QMediaPlayer
+{
 
-Q_OBJECT
+    Q_OBJECT
 
 private:
-    vector<TheButtonInfo>* infos;
-    vector<TheButton*>* buttons;
-    QTimer* mTimer;
+    vector<TheButtonInfo> *infos;
+    vector<TheButton *> *buttons;
+    QTimer *mTimer;
     long updateCount = 0;
-    TheButtonInfo* currentInfo; //info of the video currently playing
+    TheButtonInfo *currentInfo; // info of the video currently playing
 
-    //set up the layout
+    // set up the layout
     QVBoxLayout *mainLayout = new QVBoxLayout();
-    QVideoWidget *videoWidget = new QVideoWidget;
+    QVideoWidget *videoW = new QVideoWidget;
     QHBoxLayout *timeLayout = new QHBoxLayout();
     QHBoxLayout *controlsLayout = new QHBoxLayout();
     QHBoxLayout *sLayout = new QHBoxLayout();
@@ -45,30 +45,31 @@ private:
     funcBtn *fBtn = new funcBtn("forward");
     funcBtn *backBtn = new funcBtn("back");
     funcBtn *nextBtn = new funcBtn("next");
-    funcBtn* listBtn = new funcBtn("hidden");
-    funcBtn* volumeBtn = new funcBtn("volume");
-    funcBtn* fullScreenBtn = new funcBtn("full");
-    QSlider* volumeSlider = new MySlider;
-    QSlider* timeSlider = new MySlider;
+    funcBtn *listBtn = new funcBtn("hidden");
+    funcBtn *volumeBtn = new funcBtn("volume");
+    funcBtn *fullScreenBtn = new funcBtn("full");
+    QSlider *volumebar = new MySlider;
+    QSlider *timebar = new MySlider;
     QWidget *display = new QWidget;
     QWidget *space = new QWidget;
-    QLabel *name = new  QLabel();
-    QLabel* timelabel = new QLabel();
+    QLabel *name = new QLabel();
+    QLabel *timelabel = new QLabel();
 
     bool isPress = false;
+
 public:
     ThePlayer();
     // all buttons have been setup, store pointers here
-    void setContent(vector<TheButton*>* b, vector<TheButtonInfo>* i);
+    void setContent(vector<TheButton *> *b, vector<TheButtonInfo> *i);
 
-    QWidget* getDisplay() const { return display; }
-    TheButtonInfo* getInfo() { return currentInfo; }
+    QWidget *getDisplay() const { return display; }
+    TheButtonInfo *getInfo() { return currentInfo; }
     void setfunctions();
 
     bool eventFilter(QObject *watched, QEvent *event);
 signals:
     void sigOpenList(bool flag);
-    void nextclick(TheButtonInfo*);
+    void nextclick(TheButtonInfo *);
 private slots:
     void playEvent();
     void fEvent();
@@ -82,14 +83,13 @@ private slots:
     void Mute();
     void VolumeChanged(int val);
 
-
     void Sender();
 
-    void State(QMediaPlayer::State newstate);
+    void State(QMediaPlayer::State updatestate);
     void Play(bool flag);
 public slots:
     // start playing this ButtonInfo
-    void jumpTo (TheButtonInfo* button);
+    void jumpTo(TheButtonInfo *button);
 };
 
-#endif //CW2_THE_PLAYER_H
+#endif // CW2_THE_PLAYER_H

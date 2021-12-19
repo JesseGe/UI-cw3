@@ -18,7 +18,7 @@ void funcBtn::enterEvent(QEvent *event)
 
 }
 
-void funcBtn::leaveEvent(QEvent *event)
+void funcBtn::leaveEvent()
 {
    setCursor(Qt::PointingHandCursor);
    update();

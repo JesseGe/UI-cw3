@@ -13,22 +13,22 @@ ThePlayer::ThePlayer() : QMediaPlayer(NULL)
 {
     setVolume(80); // be slightly less annoying
     setNotifyInterval(1);
-    volumeSlider->setRange(0, 100);
-    volumeSlider->setValue(80);
+    volumebar->setRange(0, 100);
+    volumebar->setValue(80);
 
-    videoWidget->setMinimumHeight(480);
-    this->setVideoOutput(videoWidget);
-    videoWidget->installEventFilter(this);
+    videoW->setMinimumHeight(480);
+    this->setVideoOutput(videoW);
+    videoW->installEventFilter(this);
 
-    timeLayout->addWidget(timeSlider);
-    timeSlider->setOrientation(Qt::Horizontal);
+    timeLayout->addWidget(timebar);
+    timebar->setOrientation(Qt::Horizontal);
     timelabel->setText("00:00/00:00");
     timeLayout->addWidget(timelabel);
 
     name->setStyleSheet("font-weight: bold;font: 15pt Arial Bold");
 
     mainLayout->addWidget(name, 1, Qt::AlignCenter);
-    mainLayout->addWidget(videoWidget);
+    mainLayout->addWidget(videoW);
     mainLayout->addLayout(timeLayout);
     mainLayout->addLayout(controlsLayout);
 
@@ -38,11 +38,11 @@ ThePlayer::ThePlayer() : QMediaPlayer(NULL)
     controlsLayout->addWidget(fBtn);
     controlsLayout->addWidget(nextBtn);
     controlsLayout->addWidget(volumeBtn);
-    controlsLayout->addWidget(volumeSlider);
+    controlsLayout->addWidget(volumebar);
     mainLayout->addLayout(sLayout);
     controlsLayout->addWidget(fullScreenBtn);
     controlsLayout->addWidget(listBtn);
-    volumeSlider->setOrientation(Qt::Horizontal);
+    volumebar->setOrientation(Qt::Horizontal);
     setfunctions();
     display->setLayout(mainLayout);
 }
@@ -54,18 +54,18 @@ void ThePlayer::setfunctions()
     connect(fBtn, SIGNAL(released()), this, SLOT(Sender()));
     connect(backBtn, SIGNAL(released()), this, SLOT(Sender()));
     connect(nextBtn, SIGNAL(released()), this, SLOT(nextEvent()));
-    connect(restartButton, SIGNAL (released()), this, SLOT (restartClicked()));
+    connect(restartButton, SIGNAL(released()), this, SLOT(restartClicked()));
     listBtn->setCheckable(true);
     connect(listBtn, SIGNAL(clicked(bool)), this, SIGNAL(sigOpenList(bool)));
     connect(volumeBtn, SIGNAL(released()), this, SLOT(Mute()));
     fullScreenBtn->setCheckable(true);
     connect(fullScreenBtn, &QPushButton::clicked, [=](bool)
-            { videoWidget->setFullScreen(true); });
+            { videoW->setFullScreen(true); });
     connect(this, SIGNAL(positionChanged(qint64)), this, SLOT(Position(qint64)));
     connect(this, SIGNAL(durationChanged(qint64)), this, SLOT(Duration(qint64)));
-    connect(timeSlider, SIGNAL(sliderPressed()), this, SLOT(Press()));
-    connect(timeSlider, SIGNAL(sliderReleased()), this, SLOT(Release()));
-    connect(volumeSlider, SIGNAL(valueChanged(int)), this, SLOT(VolumeChanged(int)));
+    connect(timebar, SIGNAL(sliderPressed()), this, SLOT(Press()));
+    connect(timebar, SIGNAL(sliderReleased()), this, SLOT(Release()));
+    connect(volumebar, SIGNAL(valueChanged(int)), this, SLOT(VolumeChanged(int)));
     connect(this, SIGNAL(stateChanged(QMediaPlayer::State)), this,
             SLOT(State(QMediaPlayer::State)));
 }
@@ -87,52 +87,44 @@ void ThePlayer::setContent(std::vector<TheButton *> *b, std::vector<TheButtonInf
 
 bool ThePlayer::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == videoWidget)
+    if (watched != videoW)
+        return QMediaPlayer::eventFilter(watched, event);
+    else
     {
         if (event->type() == QEvent::MouseButtonDblClick)
         {
-            if (videoWidget->isFullScreen())
-            {
-                videoWidget->setFullScreen(false);
-            }
+            if (videoW->isFullScreen())
+                videoW->setFullScreen(false);
             else
-            {
-                videoWidget->setFullScreen(true);
-            }
+                videoW->setFullScreen(true);
         }
         else if (event->type() == QEvent::MouseButtonRelease)
-        {
             playEvent();
-        }
         else if (event->type() == QEvent::KeyPress)
         {
             QKeyEvent *keyevent = (QKeyEvent *)event;
-            if (keyevent->key() == Qt::Key_Escape && videoWidget->isFullScreen())
-            {
-                videoWidget->setFullScreen(false);
-            }
+            if (keyevent->key() == Qt::Key_Escape && videoW->isFullScreen())
+                videoW->setFullScreen(false);
         }
     }
-
     return QMediaPlayer::eventFilter(watched, event);
 }
 
 void ThePlayer::Mute()
 {
-    if (this->volume() != 0)
-    {
-        this->setMuted(true);
-        volumeSlider->setValue(0);
-        volumeBtn->name = "mute";
-        volumeBtn->setIcon(QIcon((":/playback_images/mute.png")));
-    }
-    else
+    if (this->volume() == 0)
     {
         this->setMuted(false);
         volumeBtn->name = "volume";
         volumeBtn->setIcon(QIcon((":/playback_images/volume.png")));
-        volumeSlider->setValue(80);
-        
+        volumebar->setValue(80);
+    }
+    else
+    {
+        this->setMuted(true);
+        volumebar->setValue(0);
+        volumeBtn->name = "mute";
+        volumeBtn->setIcon(QIcon((":/playback_images/mute.png")));
     }
 }
 
@@ -152,8 +144,8 @@ void ThePlayer::Sender()
     qint64 time = this->position();
     if (backBtn == btn)
     {
-        time -= 5000;
-        if (time < 0)
+        time -= 3000;
+        if (time <= 0)
         {
             this->stop();
             return;
@@ -161,11 +153,10 @@ void ThePlayer::Sender()
     }
     else
     {
-        time += 5000;
-
+        time += 3000;
         if (time > this->duration())
         {
-            this->stop();
+            this->nextEvent();
             return;
         }
     }
@@ -173,16 +164,16 @@ void ThePlayer::Sender()
     this->setPosition(time);
 }
 
-void ThePlayer::State(QMediaPlayer::State newstate)
+void ThePlayer::State(QMediaPlayer::State updatestate)
 {
 
-    switch (newstate)
+    switch (updatestate)
     {
     case QMediaPlayer::State::StoppedState:
         playBtn->setChecked(false);
         playBtn->name = "play";
         playBtn->setIcon(QIcon((":/playback_images/play.png")));
-        timeSlider->setValue(0);
+        timebar->setValue(0);
         break;
     case QMediaPlayer::State::PlayingState:
         playBtn->name = "pause";
@@ -194,37 +185,31 @@ void ThePlayer::State(QMediaPlayer::State newstate)
         playBtn->setIcon(QIcon((":/playback_images/play.png")));
         playBtn->setChecked(false);
         break;
-
     }
 }
-
 
 void ThePlayer::Play(bool flag)
 {
     if (flag)
-    {
         play();
-    }
     else
-    {
         pause();
-    }
 }
 
 void ThePlayer::Position(qint64 time)
 {
     if (!isPress)
-        timeSlider->setValue(time);
+        timebar->setValue(time);
 
     timelabel->setText(QString("%1/%2").arg(QTime::fromMSecsSinceStartOfDay(time)
                                                 .toString("mm:ss"))
-                           .arg(QTime::fromMSecsSinceStartOfDay(timeSlider->maximum())
+                           .arg(QTime::fromMSecsSinceStartOfDay(timebar->maximum())
                                     .toString("mm:ss")));
 }
 
 void ThePlayer::Duration(qint64 time)
 {
-    timeSlider->setRange(0, time);
+    timebar->setRange(0, time);
 
     timelabel->setText(QString("%1/%2").arg(QTime::fromMSecsSinceStartOfDay(0).toString("mm:ss")).arg(QTime::fromMSecsSinceStartOfDay(time).toString("mm:ss")));
 }
@@ -237,7 +222,7 @@ void ThePlayer::Press()
 void ThePlayer::Release()
 {
     isPress = false;
-    this->setPosition(timeSlider->value());
+    this->setPosition(timebar->value());
 }
 
 void ThePlayer::playEvent()
@@ -282,17 +267,12 @@ void ThePlayer::backEvent()
     setPlaybackRate(-2);
 }
 
-void ThePlayer::restartClicked() {
+void ThePlayer::restartClicked()
+{
     setMedia(*currentInfo->url);
     setPlaybackRate(1);
     play();
 }
-
-void ThePlayer::nextEvent()
-{
-    jumpTo(buttons->at(1)->infomation);
-}
-
 
 void ThePlayer::jumpTo(TheButtonInfo *button)
 {
@@ -323,4 +303,9 @@ void ThePlayer::jumpTo(TheButtonInfo *button)
     data = file.baseName();
     name->setText(data);
     emit nextclick(currentInfo);
+}
+
+void ThePlayer::nextEvent()
+{
+    jumpTo(buttons->at(1)->infomation);
 }

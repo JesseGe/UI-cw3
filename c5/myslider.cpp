@@ -2,32 +2,30 @@
 #include <QMouseEvent>
 #include <QDebug>
 
-MySlider::MySlider(QWidget *parent):QSlider (parent)
+MySlider::MySlider(QWidget *parent) : QSlider(parent)
 {
-
 }
 
 MySlider::~MySlider()
 {
-
 }
 
 void MySlider::mousePressEvent(QMouseEvent *ev)
 {
-    //获取当前点击位置
+    // Gets the current click location
     int currentX = ev->pos().x();
 
-    //获取当前点击的位置占整个Slider的百分比
-    double per = currentX *1.0 /this->width();
+    // Gets the percentage of the entire Slider where the current click is
+    double per = currentX * 1.0 / this->width();
 
-    //利用算得的百分比得到具体数字
-    int value = per*(this->maximum() - this->minimum()) + this->minimum();
+    // Specific figures are obtained using the calculated percentages
+    int value = per * (this->maximum() - this->minimum()) + this->minimum();
 
-//    qDebug() << value;
+    //    qDebug() << value;
 
-    //设定滑动条位置
+    // Sets the slider position
     this->setValue(value);
 
-    //滑动条移动事件等事件也用到了mousePressEvent,加这句话是为了不对其产生影响，是的Slider能正常相应其他鼠标事件
+    // Events such as slider movement events also use mousePressEvent, and this sentence is added so as not to affect it, and slider can respond normally to other mouse events
     QSlider::mousePressEvent(ev);
 }
